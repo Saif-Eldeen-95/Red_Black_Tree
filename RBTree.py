@@ -181,5 +181,7 @@ def print_tree_size(tree):
 arr = [10, 70, 30, 40, 20, 60, 50]
 tree = array_to_tree(arr)
 print_tree(tree)
-print(print_tree_height(tree))
-print(print_tree_black_height(tree))
+print()
+print("height: "+str(print_tree_height(tree)))
+print("black height: "+str(print_tree_black_height(tree)))
+print("size: "+str(print_tree_size(tree)))
