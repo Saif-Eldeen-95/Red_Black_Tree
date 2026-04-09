@@ -1,21 +1,27 @@
 # creation **************************************************************************
-def create_node(key):
+def create_node(key, tree):
     return {
         "key": key,
         "color": "RED",
+        "left": tree["NIL"],
+        "right": tree["NIL"],
+        "parent": tree["NIL"]
+    }
+
+def create_tree():
+    NIL = {
+        "color": "BLACK",
         "left": None,
         "right": None,
         "parent": None
     }
-
-def create_tree():
-    NIL = {"color": "BLACK"}
     return {
         "root": NIL,
         "NIL": NIL
     }
 
 # insertion and fixing **************************************************************************
+
 def left_rotate(tree, x):
     NIL = tree["NIL"]
     y = x["right"]
@@ -23,10 +29,8 @@ def left_rotate(tree, x):
 
     if y["left"] != NIL:
         y["left"]["parent"] = x
-
     y["parent"] = x["parent"]
-
-    if x["parent"] is None:
+    if x["parent"] == NIL:
         tree["root"] = y
     elif x == x["parent"]["left"]:
         x["parent"]["left"] = y
@@ -46,7 +50,7 @@ def right_rotate(tree, x):
 
     y["parent"] = x["parent"]
 
-    if x["parent"] is None:
+    if x["parent"] == NIL:
         tree["root"] = y
     elif x == x["parent"]["right"]:
         x["parent"]["right"] = y
@@ -59,23 +63,23 @@ def right_rotate(tree, x):
 def fix_insert(tree, k):
     NIL = tree["NIL"]
 
-    while k["parent"] and k["parent"]["color"] == "RED":
+    while k["parent"]["color"] == "RED":
         if k["parent"] == k["parent"]["parent"]["left"]:
             u = k["parent"]["parent"]["right"]  # uncle
 
             if u["color"] == "RED":
-                # Case 1: recolor
+                # Case 1
                 k["parent"]["color"] = "BLACK"
                 u["color"] = "BLACK"
                 k["parent"]["parent"]["color"] = "RED"
                 k = k["parent"]["parent"]
             else:
                 if k == k["parent"]["right"]:
-                    # Case 2: left rotate
+                    # Case 2
                     k = k["parent"]
                     left_rotate(tree, k)
 
-                # Case 3: right rotate
+                # Case 3
                 k["parent"]["color"] = "BLACK"
                 k["parent"]["parent"]["color"] = "RED"
                 right_rotate(tree, k["parent"]["parent"])
@@ -100,11 +104,9 @@ def fix_insert(tree, k):
 
 def insert(tree, key):
     NIL = tree["NIL"]
-    node = create_node(key)
-    node["left"] = NIL
-    node["right"] = NIL
+    node = create_node(key, tree)
 
-    parent = None
+    parent = NIL
     current = tree["root"]
 
     while current != NIL:
@@ -116,7 +118,7 @@ def insert(tree, key):
 
     node["parent"] = parent
 
-    if parent is None:
+    if parent == NIL:
         tree["root"] = node
     elif node["key"] < parent["key"]:
         parent["left"] = node
@@ -153,7 +155,7 @@ def search(tree, key):
             current = current["right"]
     return current
 
-#print tree height **************************************************************************     
+# print tree height **************************************************************************     
 def print_tree_height(tree):
     def height(node):
         if node == tree["NIL"]:
@@ -161,15 +163,15 @@ def print_tree_height(tree):
         return 1 + max(height(node["left"]), height(node["right"]))
     return height(tree["root"])
 
-#print tree black height **************************************************************************     
+# print tree black height **************************************************************************     
 def print_tree_black_height(tree):
     def black_height(node):
         if node == tree["NIL"]:
             return 0
-        return 1 + black_height(node["left"])
+        return (1 if node["color"] == "BLACK" else 0) + black_height(node["left"])
     return black_height(tree["root"])
 
-#print tree size **************************************************************************     
+# print tree size **************************************************************************     
 def print_tree_size(tree):
     def size(node):
         if node == tree["NIL"]:
@@ -182,6 +184,13 @@ arr = [10, 70, 30, 40, 20, 60, 50]
 tree = array_to_tree(arr)
 print_tree(tree)
 print()
-print("height: "+str(print_tree_height(tree)))
-print("black height: "+str(print_tree_black_height(tree)))
-print("size: "+str(print_tree_size(tree)))
+print("height:", print_tree_height(tree))
+print("black height:", print_tree_black_height(tree))
+print("size:", print_tree_size(tree))
+print("-----------------------")
+insert(tree, 100)
+print_tree(tree)
+print()
+print("height:", print_tree_height(tree))
+print("black height:", print_tree_black_height(tree))
+print("size:", print_tree_size(tree))
