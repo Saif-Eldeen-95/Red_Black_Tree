@@ -1,124 +1,125 @@
-class Node:
-    def __init__(self, key):
-        self.key = key
-        self.color = "RED"
-        self.left = None
-        self.right = None
-        self.parent = None
+def create_node(key):
+    return {
+        "key": key,
+        "color": "RED",
+        "left": None,
+        "right": None,
+        "parent": None
+    }
 
+def create_tree():
+    NIL = {"color": "BLACK"}
+    return {
+        "root": NIL,
+        "NIL": NIL
+    }
 
-class RedBlackTree:
-    def __init__(self):
-        self.NIL = Node(0)
-        self.NIL.color = "BLACK"
-        self.root = self.NIL
+def left_rotate(tree, x):
+    NIL = tree["NIL"]
+    y = x["right"]
+    x["right"] = y["left"]
 
-    # LEFT ROTATE
-    def left_rotate(self, x):
-        y = x.right
-        x.right = y.left
-        if y.left != self.NIL:
-            y.left.parent = x
+    if y["left"] != NIL:
+        y["left"]["parent"] = x
 
-        y.parent = x.parent
-        if x.parent is None:
-            self.root = y
-        elif x == x.parent.left:
-            x.parent.left = y
+    y["parent"] = x["parent"]
+
+    if x["parent"] is None:
+        tree["root"] = y
+    elif x == x["parent"]["left"]:
+        x["parent"]["left"] = y
+    else:
+        x["parent"]["right"] = y
+
+    y["left"] = x
+    x["parent"] = y
+
+def right_rotate(tree, x):
+    NIL = tree["NIL"]
+    y = x["left"]
+    x["left"] = y["right"]
+
+    if y["right"] != NIL:
+        y["right"]["parent"] = x
+
+    y["parent"] = x["parent"]
+
+    if x["parent"] is None:
+        tree["root"] = y
+    elif x == x["parent"]["right"]:
+        x["parent"]["right"] = y
+    else:
+        x["parent"]["left"] = y
+
+    y["right"] = x
+    x["parent"] = y
+
+def insert(tree, key):
+    NIL = tree["NIL"]
+    node = create_node(key)
+    node["left"] = NIL
+    node["right"] = NIL
+
+    parent = None
+    current = tree["root"]
+
+    while current != NIL:
+        parent = current
+        if node["key"] < current["key"]:
+            current = current["left"]
         else:
-            x.parent.right = y
+            current = current["right"]
 
-        y.left = x
-        x.parent = y
+    node["parent"] = parent
 
-    # RIGHT ROTATE
-    def right_rotate(self, x):
-        y = x.left
-        x.left = y.right
-        if y.right != self.NIL:
-            y.right.parent = x
+    if parent is None:
+        tree["root"] = node
+    elif node["key"] < parent["key"]:
+        parent["left"] = node
+    else:
+        parent["right"] = node
 
-        y.parent = x.parent
-        if x.parent is None:
-            self.root = y
-        elif x == x.parent.right:
-            x.parent.right = y
-        else:
-            x.parent.left = y
+    node["color"] = "RED"
+    fix_insert(tree, node)
 
-        y.right = x
-        x.parent = y
+def fix_insert(tree, k):
+    NIL = tree["NIL"]
 
-    # INSERT
-    def insert(self, key):
-        node = Node(key)
-        node.left = self.NIL
-        node.right = self.NIL
+    while k["parent"] and k["parent"]["color"] == "RED":
+        if k["parent"] == k["parent"]["parent"]["left"]:
+            u = k["parent"]["parent"]["right"]  # uncle
 
-        parent = None
-        current = self.root
-
-        while current != self.NIL:
-            parent = current
-            if node.key < current.key:
-                current = current.left
+            if u["color"] == "RED":
+                # Case 1: recolor
+                k["parent"]["color"] = "BLACK"
+                u["color"] = "BLACK"
+                k["parent"]["parent"]["color"] = "RED"
+                k = k["parent"]["parent"]
             else:
-                current = current.right
+                if k == k["parent"]["right"]:
+                    # Case 2: left rotate
+                    k = k["parent"]
+                    left_rotate(tree, k)
 
-        node.parent = parent
-
-        if parent is None:
-            self.root = node
-        elif node.key < parent.key:
-            parent.left = node
+                # Case 3: right rotate
+                k["parent"]["color"] = "BLACK"
+                k["parent"]["parent"]["color"] = "RED"
+                right_rotate(tree, k["parent"]["parent"])
         else:
-            parent.right = node
+            u = k["parent"]["parent"]["left"]
 
-        node.color = "RED"
-        self.fix_insert(node)
-
-    # FIX VIOLATIONS
-    def fix_insert(self, k):
-        while k.parent and k.parent.color == "RED":
-            if k.parent == k.parent.parent.left:
-                u = k.parent.parent.right  # uncle
-
-                if u.color == "RED":
-                    # Case 1: recolor
-                    k.parent.color = "BLACK"
-                    u.color = "BLACK"
-                    k.parent.parent.color = "RED"
-                    k = k.parent.parent
-                else:
-                    if k == k.parent.right:
-                        # Case 2: left rotate
-                        k = k.parent
-                        self.left_rotate(k)
-                    # Case 3: right rotate
-                    k.parent.color = "BLACK"
-                    k.parent.parent.color = "RED"
-                    self.right_rotate(k.parent.parent)
+            if u["color"] == "RED":
+                k["parent"]["color"] = "BLACK"
+                u["color"] = "BLACK"
+                k["parent"]["parent"]["color"] = "RED"
+                k = k["parent"]["parent"]
             else:
-                u = k.parent.parent.left
+                if k == k["parent"]["left"]:
+                    k = k["parent"]
+                    right_rotate(tree, k)
 
-                if u.color == "RED":
-                    k.parent.color = "BLACK"
-                    u.color = "BLACK"
-                    k.parent.parent.color = "RED"
-                    k = k.parent.parent
-                else:
-                    if k == k.parent.left:
-                        k = k.parent
-                        self.right_rotate(k)
-                    k.parent.color = "BLACK"
-                    k.parent.parent.color = "RED"
-                    self.left_rotate(k.parent.parent)
+                k["parent"]["color"] = "BLACK"
+                k["parent"]["parent"]["color"] = "RED"
+                left_rotate(tree, k["parent"]["parent"])
 
-        self.root.color = "BLACK"
-
-    # INORDER TRAVERSAL
-    def inorder(self, node):
-        if node != self.NIL:
-            self.inorder(node.left)
-            print(f"{node.key} ({node.color})", end=" ")
-            self.inorder(node.right)
+    tree["root"]["color"] = "BLACK"
